@@ -22,7 +22,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
-import fi.immonen.kalle.rgbstormer.bluetooth.Connections;
+import fi.immonen.kalle.rgbstormer.bluetooth.BluetoothService;
 
 /**
  * Fragment used for managing interactions for and presentation of a navigation drawer.
@@ -250,7 +250,7 @@ public class NavigationDrawerFragment extends Fragment {
         }
 
         if (item.getItemId() == R.id.action_example) {
-            Connections.initBluetooth();
+            BluetoothService.initBluetooth();
             Toast.makeText(getActivity(), "Bluetoothing...", Toast.LENGTH_SHORT).show();
             return true;
         }

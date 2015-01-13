@@ -7,19 +7,17 @@ import android.app.DialogFragment;
 import android.bluetooth.BluetoothDevice;
 import android.content.DialogInterface;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
-import android.support.v4.app.FragmentActivity;
 import android.widget.ArrayAdapter;
 import android.widget.Toast;
 
 import java.util.Set;
 
 import fi.immonen.kalle.rgbstormer.bluetooth.BluetoothService;
-import fi.immonen.kalle.rgbstormer.bluetooth.Connections;
 
 /**
  * Created by TeZla on 8.1.2015.
+ * <p/>
+ * Dialog for choosing bluetooth device connect to.
  */
 public class BluetoothSelectDialogFragment extends DialogFragment {
     BluetoothActions mBluetoothActions;
@@ -30,7 +28,7 @@ public class BluetoothSelectDialogFragment extends DialogFragment {
         builder.setInverseBackgroundForced(false);
 
         final ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity().getApplicationContext(), android.R.layout.simple_list_item_1);
-        Set<BluetoothDevice> pairedDevices = Connections.getPairedDevices();
+        Set<BluetoothDevice> pairedDevices = BluetoothService.getPairedDevices();
         final BluetoothDevice[] btDevices = pairedDevices.toArray(new BluetoothDevice[pairedDevices.size()]);
 
         for (BluetoothDevice device : btDevices) {
@@ -48,13 +46,7 @@ public class BluetoothSelectDialogFragment extends DialogFragment {
 
     @Override
     public void onStart() {
-        setupBluetooth();
         super.onStart();
-
-    }
-
-    private void setupBluetooth() {
-        mBluetoothService = new BluetoothService(getActivity().getApplicationContext(), mHandler);
     }
 
     @Override
@@ -64,13 +56,11 @@ public class BluetoothSelectDialogFragment extends DialogFragment {
         try {
             mBluetoothActions = (BluetoothActions) activity;
         } catch (ClassCastException e) {
-            throw new ClassCastException(activity.toString() + " must implment OnFragmentIntecratcioListneter!");
+            throw new ClassCastException(activity.toString() + " must implement OnFragmentIntecratcioListneter!");
         }
     }
 
     public interface BluetoothActions {
         public void onSelectedBluetoothDevice(BluetoothDevice device);
     }
-
-
 }

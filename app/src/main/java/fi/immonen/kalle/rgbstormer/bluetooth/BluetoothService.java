@@ -17,7 +17,7 @@ import fi.immonen.kalle.rgbstormer.Constants;
  * Created by TeZla on 7.1.2015.
  */
 //TODO: Refactoroi staattisuus pois
-public class Connections {
+public class BluetoothService {
     private static final UUID MY_UUID = UUID.randomUUID();
     private static boolean state = false;
     private static BluetoothAdapter mBluetoothAdapter;
@@ -42,17 +42,6 @@ public class Connections {
             initBluetooth();
         }
         return mBluetoothAdapter.getBondedDevices();
-    }
-
-
-    public static void connectToBluetoothDevice(BluetoothDevice device) {
-        UUID uuid = UUID.randomUUID();
-        try {
-            device.createRfcommSocketToServiceRecord(uuid);
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
     private class ConnectedThread extends Thread {
@@ -110,7 +99,9 @@ public class Connections {
             }
         }
     }
-
+    public void startConnecting(BluetoothDevice device){
+        new ConnectThread(device).start();
+    }
     private class ConnectThread extends Thread {
         private final BluetoothSocket mmSocket;
         private final BluetoothDevice mmDevice;

@@ -12,7 +12,7 @@ import android.view.MenuItem;
 import android.support.v4.widget.DrawerLayout;
 import android.widget.Toast;
 
-import fi.immonen.kalle.rgbstormer.bluetooth.Connections;
+import fi.immonen.kalle.rgbstormer.bluetooth.BluetoothService;
 
 
 public class MainActivity extends ActionBarActivity
@@ -49,7 +49,7 @@ public class MainActivity extends ActionBarActivity
     }
 
     private void bluetoothPopUpIfNotOn() {
-        if (Connections.initBluetooth()) {
+        if (BluetoothService.initBluetooth()) {
             Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
         }
@@ -131,19 +131,13 @@ public class MainActivity extends ActionBarActivity
 
     public void showBluetoothConnectionDialog() {
         // Create an instance of the dialog fragment and show it
-        BluetoothSelectDialogFragment bluetoothDialog = new BluetoothSelectDialogFragment() {
-            @Override
-            protected void onClicker(BluetoothDevice device) {
-                //TODO: Valitse parempi
-            }
-        };
+        BluetoothSelectDialogFragment bluetoothDialog = new BluetoothSelectDialogFragment();
         bluetoothDialog.show(getFragmentManager(), "BluetoothSelectDialogFragment");
     }
 
     @Override
     public void onSelectedBluetoothDevice(BluetoothDevice device) {
         Toast.makeText(this, "HelloFrom mainActivity", Toast.LENGTH_LONG).show();
-        //TODO: Valitse parempi
-        Connections.connectToBluetoothDevice(device);
+        BluetoothService.connectToBluetoothDevice(device);
     }
 }
