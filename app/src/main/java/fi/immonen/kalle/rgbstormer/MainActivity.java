@@ -3,6 +3,8 @@ package fi.immonen.kalle.rgbstormer;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
+import android.os.Handler;
+import android.os.Message;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBar;
 import android.support.v4.app.FragmentManager;
@@ -12,7 +14,9 @@ import android.view.MenuItem;
 import android.support.v4.widget.DrawerLayout;
 import android.widget.Toast;
 
-import fi.immonen.kalle.rgbstormer.bluetooth.BluetoothService;
+import fi.immonen.kalle.rgbstormer.bluetooth.BluetoothConnector;
+import fi.immonen.kalle.rgbstormer.bluetooth.BluetoothUtils;
+import fi.immonen.kalle.rgbstormer.rgb.ByteUtil;
 
 
 public class MainActivity extends ActionBarActivity
@@ -21,15 +25,20 @@ public class MainActivity extends ActionBarActivity
         BluetoothSelectDialogFragment.BluetoothActions {
 
     private static final int REQUEST_ENABLE_BT = 12;
+    public static final byte SET_STEPS = (byte) 0xFC;
+    public static final byte SET_DELAY = (byte) 0xFB;
+    public static final byte SET_FADE = (byte) 0xFA;
     /**
      * Fragment managing the behaviors, interactions and presentation of the navigation drawer.
      */
     private NavigationDrawerFragment mNavigationDrawerFragment;
 
+
     /**
      * Used to store the last screen title. For use in {@link #restoreActionBar()}.
      */
     private CharSequence mTitle;
+    private BluetoothConnector mBluetoothConnector;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,10 +55,11 @@ public class MainActivity extends ActionBarActivity
                 (DrawerLayout) findViewById(R.id.drawer_layout));
 
         bluetoothPopUpIfNotOn();
+
     }
 
     private void bluetoothPopUpIfNotOn() {
-        if (BluetoothService.initBluetooth()) {
+        if (BluetoothUtils.initBluetooth()) {
             Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
         }
@@ -122,11 +132,48 @@ public class MainActivity extends ActionBarActivity
     @Override
     public void onColorSelected(int color) {
         System.out.println("Color found" + color);
+        if (mBluetoothConnector != null) {
+            byte[] bytes = ByteUtil.hexStringToByteArray(Integer.toHexString(color));
+
+            mBluetoothConnector.write(ByteUtil.invertAllButFirstByte(bytes));
+        }
     }
 
     @Override
     public void buttonClicked() {
         showBluetoothConnectionDialog();
+    }
+
+    @Override
+    public void onModeActivated(int mode) {
+        if (mBluetoothConnector != null) {
+            byte[] bytes = {(byte) mode};
+            mBluetoothConnector.write(bytes);
+        }
+    }
+
+    @Override
+    public void onFadeSet(int fade) {
+        if (mBluetoothConnector != null) {
+            byte[] bytes = {SET_FADE, (byte) fade, (byte) fade};
+            mBluetoothConnector.write(bytes);
+        }
+    }
+
+    @Override
+    public void onDelaySet(int delay) {
+        if (mBluetoothConnector != null) {
+            byte[] bytes = {SET_DELAY, (byte) delay, (byte) delay};
+            mBluetoothConnector.write(bytes);
+        }
+    }
+
+    @Override
+    public void onStepsSet(int steps) {
+        if (mBluetoothConnector != null) {
+            byte[] bytes = {SET_STEPS, (byte) steps, (byte) steps};
+            mBluetoothConnector.write(bytes);
+        }
     }
 
     public void showBluetoothConnectionDialog() {
@@ -137,7 +184,37 @@ public class MainActivity extends ActionBarActivity
 
     @Override
     public void onSelectedBluetoothDevice(BluetoothDevice device) {
-        Toast.makeText(this, "HelloFrom mainActivity", Toast.LENGTH_LONG).show();
-        BluetoothService.connectToBluetoothDevice(device);
+        mBluetoothConnector = new BluetoothConnector(device, mHandler);
+        mBluetoothConnector.connect();
     }
+
+    private final Handler mHandler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case Constants.MESSAGE_TOAST:
+                    break;
+
+                case Constants.MESSAGE_READ:
+                    break;
+
+                case Constants.MESSAGE_WRITE:
+                    break;
+
+                case Constants.MESSAGE_DEVICE_NAME:
+                    break;
+
+                case Constants.MESSAGE_STATE_CHANGE:
+                    switch (msg.arg1) {
+                        case Constants.STATE_CONNECTED:
+                            Toast.makeText(getApplicationContext(), "Connected", Toast.LENGTH_SHORT).show();
+                        case Constants.STATE_CONNECTING:
+                            Toast.makeText(getApplicationContext(), "Connecting", Toast.LENGTH_SHORT).show();
+                        case Constants.STATE_DISCONNECTED:
+                            Toast.makeText(getApplicationContext(), "Disconnected", Toast.LENGTH_SHORT).show();
+                    }
+                    break;
+            }
+        }
+    };
 }

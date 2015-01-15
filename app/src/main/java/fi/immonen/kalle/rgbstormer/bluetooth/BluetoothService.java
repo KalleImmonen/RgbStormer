@@ -3,7 +3,9 @@ package fi.immonen.kalle.rgbstormer.bluetooth;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
+import android.os.Bundle;
 import android.os.Handler;
+import android.os.Message;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -16,32 +18,15 @@ import fi.immonen.kalle.rgbstormer.Constants;
 /**
  * Created by TeZla on 7.1.2015.
  */
-//TODO: Refactoroi staattisuus pois
 public class BluetoothService {
     private static final UUID MY_UUID = UUID.randomUUID();
     private static boolean state = false;
-    private static BluetoothAdapter mBluetoothAdapter;
+    private final BluetoothAdapter mBluetoothAdapter;
     private Handler mHandler;
 
-    public static boolean initBluetooth() {
+    public BluetoothService(Handler handler) {
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-        if (!mBluetoothAdapter.isEnabled()) {
-            System.out.println("Bluetooth is Disable...");
-            state = true;
-        } else if (mBluetoothAdapter.isEnabled()) {
-            String address = mBluetoothAdapter.getAddress();
-            String name = mBluetoothAdapter.getName();
-            System.out.println(String.format("Bluetooth name: %s. Address: %s", name, address));
-            state = false;
-        }
-        return state;
-    }
-
-    public static Set<BluetoothDevice> getPairedDevices() {
-        if (mBluetoothAdapter == null) {
-            initBluetooth();
-        }
-        return mBluetoothAdapter.getBondedDevices();
+        mHandler = handler;
     }
 
     private class ConnectedThread extends Thread {
@@ -50,6 +35,8 @@ public class BluetoothService {
         private final OutputStream mmOutStream;
 
         public ConnectedThread(BluetoothSocket socket) {
+
+
             mmSocket = socket;
             InputStream tmpIn = null;
             OutputStream tmpOut = null;
@@ -64,6 +51,10 @@ public class BluetoothService {
 
             mmInStream = tmpIn;
             mmOutStream = tmpOut;
+
+            Message msg = mHandler.obtainMessage(Constants.MESSAGE_STATE_CHANGE);
+            msg.arg1 = Constants.STATE_CONNECTED;
+            mHandler.sendMessage(msg);
         }
 
         public void run() {
@@ -99,9 +90,12 @@ public class BluetoothService {
             }
         }
     }
-    public void startConnecting(BluetoothDevice device){
-        new ConnectThread(device).start();
+
+    public void startConnecting(BluetoothDevice device) {
+        ConnectThread connectThread = new ConnectThread(device);
+        connectThread.start();
     }
+
     private class ConnectThread extends Thread {
         private final BluetoothSocket mmSocket;
         private final BluetoothDevice mmDevice;
@@ -115,7 +109,7 @@ public class BluetoothService {
             // Get a BluetoothSocket to connect with the given BluetoothDevice
             try {
                 // MY_UUID is the app's UUID string, also used by the server code
-                tmp = device.createRfcommSocketToServiceRecord(MY_UUID);
+                tmp = device.createInsecureRfcommSocketToServiceRecord(MY_UUID);
             } catch (IOException e) {
             }
             mmSocket = tmp;
@@ -153,8 +147,9 @@ public class BluetoothService {
     }
 
     private void manageConnectedSocket(BluetoothSocket mmSocket) {
-        ConnectedThread a = new ConnectedThread(mmSocket);
-        a.start();
+        ConnectedThread connectedThread = new ConnectedThread(mmSocket);
+        connectedThread.start();
+
     }
 }
 

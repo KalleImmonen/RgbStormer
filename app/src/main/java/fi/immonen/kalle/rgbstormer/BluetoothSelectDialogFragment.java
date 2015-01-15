@@ -13,6 +13,7 @@ import android.widget.Toast;
 import java.util.Set;
 
 import fi.immonen.kalle.rgbstormer.bluetooth.BluetoothService;
+import fi.immonen.kalle.rgbstormer.bluetooth.BluetoothUtils;
 
 /**
  * Created by TeZla on 8.1.2015.
@@ -28,7 +29,7 @@ public class BluetoothSelectDialogFragment extends DialogFragment {
         builder.setInverseBackgroundForced(false);
 
         final ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity().getApplicationContext(), android.R.layout.simple_list_item_1);
-        Set<BluetoothDevice> pairedDevices = BluetoothService.getPairedDevices();
+        Set<BluetoothDevice> pairedDevices = BluetoothUtils.getPairedDevices();
         final BluetoothDevice[] btDevices = pairedDevices.toArray(new BluetoothDevice[pairedDevices.size()]);
 
         for (BluetoothDevice device : btDevices) {

@@ -36,17 +36,25 @@
         />
 
 
-    <com.larswerkman.holocolorpicker.SVBar
-        android:id="@+id/svbar"
-        android:layout_below="@+id/color_picker"
+    <com.larswerkman.holocolorpicker.OpacityBar
+        android:id="@+id/bar_steps"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/color_picker"
+        android:layout_alignLeft="@+id/bar_fade"
+        android:layout_alignStart="@+id/bar_fade" />
+
+    <com.larswerkman.holocolorpicker.OpacityBar
+        android:id="@+id/bar_fade"
+        android:layout_below="@+id/bar_steps"
         android:layout_marginTop="10dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"/>
+        android:layout_centerHorizontal="true" />
 
     <com.larswerkman.holocolorpicker.OpacityBar
-        android:id="@+id/opacitybar"
-        android:layout_below="@+id/svbar"
+        android:id="@+id/bar_delay"
+        android:layout_below="@+id/bar_fade"
         android:layout_marginTop="10dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -57,7 +65,38 @@
         android:layout_height="wrap_content"
         android:text="Pick color"
         android:id="@+id/button_pick_color"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true" />
+        android:layout_alignTop="@+id/color_picker"
+        android:layout_alignRight="@+id/color_picker"
+        android:layout_alignEnd="@+id/color_picker" />
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_toRightOf="@+id/section_label"
+        android:layout_toEndOf="@+id/section_label"
+        android:layout_below="@+id/bar_delay">
+
+        <NumberPicker
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/picker_active_mode"
+            android:layout_below="@+id/bar_fade"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:orientation="vertical"
+            android:layout_gravity="bottom" />
+
+        Button
+            style="?android:attr/buttonStyleSmall"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="Set Mode"
+            android:id="@+id/button_activate_mode"
+            android:layout_alignParentBottom="true"
+            android:layout_alignRight="@+id/opacitybar"
+            android:layout_alignEnd="@+id/opacitybar"
+            android:layout_gravity="center_vertical" />
+    </LinearLayout>
 
 </RelativeLayout>
